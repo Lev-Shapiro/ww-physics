@@ -1,19 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from domain.dto.exhaust_dto import ExhaustDto
+from domain.universal.temperature_kelvin import TemperatureKelvin
+from domain.universal.pressure import PsiaPressure
 
 from .components.fuel import FuelType
 from .components.oxidizer import OxidizerType
 from .components.solid_propellant import SolidPropellantMixture
 
 from rocketcea.cea_obj import CEA_Obj, add_new_propellant
-
-@dataclass(frozen=True, slots=True)
-class ExhaustProperties:
-    molecular_weight: float  # in g/mol
-    flame_temperature: float  # in Kelvin
-    gamma: float  # Ratio of specific heats
-
 
 class ThermodynamicsCalculator:
     """
@@ -22,8 +17,8 @@ class ThermodynamicsCalculator:
 
     @staticmethod
     def calculate_apcp_properties(
-        mixture: SolidPropellantMixture, chamber_pressure_psia: float = 1000.0
-    ) -> ExhaustProperties:
+        mixture: SolidPropellantMixture, chamber_pressure: PsiaPressure
+    ) -> ExhaustDto:
         """
         Calculates the thermodynamic properties of an APCP mixture.
         Assumes the mixture contains Aluminum, HTPB as fuels and AP as oxidizer.
@@ -46,7 +41,8 @@ class ThermodynamicsCalculator:
         propellant_name = f"APCP_{al_pct:.2f}_{ap_pct:.2f}_{htpb_pct:.2f}".replace(".", "_")
         
         add_new_propellant(propellant_name, f"""
-fuel NH4CLO4(I)       wt%={ap_pct}
+oxidizer NH4CLO4(I)   wt%={ap_pct}
+h,cal=-70690.0 t(k)=298.15 rho=1.95
 fuel R-45(HTPB FROM_RPL_DATA) C 7.3165 H 10.3360 O 0.1063    wt%={htpb_pct}
 h,cal= 1200.0 t(k)=298.15 rho=0.9220
 fuel Aluminum  AL 1       wt%={al_pct}
@@ -55,12 +51,12 @@ h,cal=0.0     t(k)=298.15
 
         cea = CEA_Obj(propName=propellant_name)
 
-        mw, gamma = cea.get_Chamber_MolWt_gamma(Pc=chamber_pressure_psia, MR=1.0, eps=10.0)
-        t_comb_rankine = cea.get_Tcomb(Pc=chamber_pressure_psia, MR=1.0)
+        mw, gamma = cea.get_Chamber_MolWt_gamma(Pc=chamber_pressure.psia, MR=1.0, eps=10.0)
+        t_comb_rankine = cea.get_Tcomb(Pc=chamber_pressure.psia, MR=1.0)
         t_comb_kelvin = t_comb_rankine * 5.0 / 9.0
 
-        return ExhaustProperties(
+        return ExhaustDto(
             molecular_weight=float(mw),
-            flame_temperature=float(t_comb_kelvin),
+            flame_temperature=TemperatureKelvin.from_kelvin(float(t_comb_kelvin)),
             gamma=float(gamma),
         )

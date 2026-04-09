@@ -27,6 +27,15 @@ class SolidPropellantMixture:
     def ratio(self) -> float:
         ox_mass = self.oxidizer_mass
         return self.fuel_mass / ox_mass if ox_mass > 0 else float('inf')
+    
+    def use(self, relative_mass_flow_rate):
+        missile_mass = self.mass
+        
+        for fuel in self.fuels:
+            fuel.use(fuel.mass / missile_mass * relative_mass_flow_rate)
+        
+        for oxidizer in self.oxidizers:
+            oxidizer.use(oxidizer.mass / missile_mass * relative_mass_flow_rate)
 
     @classmethod
     def mix(cls, fuels: tuple[Fuel, ...], oxidizers: tuple[Oxidizer, ...]) -> "SolidPropellantMixture":
