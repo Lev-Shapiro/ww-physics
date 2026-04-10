@@ -11,6 +11,7 @@ class FuelType(str, Enum):
     HTPB = "HTPB"
     KEROSENE = "K"
     HYDROGEN = "H"
+    HMX = "HMX"
 
 
 @dataclass(slots=True)

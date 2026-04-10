@@ -8,6 +8,7 @@ from domain.universal.pressure import PsiaPressure
 from domain.universal.time import Time
 from nasa_cea.cea_apcp import CEAAPCP
 from nasa_cea.cea_calculator import CEACalculator
+from nasa_cea.cea_nepe import CEANEPE
 
 class BoostingMissilePhase:
     """Powered ascent; transitions from or into ballistic behavior via the ballistic phase context."""
@@ -95,5 +96,10 @@ class BoostingMissilePhase:
 
     @staticmethod
     def from_apcp(missile: Missile, chamber_pressure: PsiaPressure = PsiaPressure(psia=1000)) -> BoostingMissilePhase:
-      cea_calculator = CEAAPCP(missile.propellant, chamber_pressure)
-      return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
+        cea_calculator = CEAAPCP(missile.propellant, chamber_pressure)
+        return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
+
+    @staticmethod
+    def from_nepe(missile: Missile, chamber_pressure: PsiaPressure = PsiaPressure(psia=1000)) -> BoostingMissilePhase:
+        cea_calculator = CEANEPE(missile.propellant, chamber_pressure)
+        return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
