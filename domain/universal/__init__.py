@@ -1,8 +1,8 @@
 """Universal value objects shared across domains."""
 
-from .temperature_kelvin import TemperatureKelvin
-from .kilograms_mass import KilogramMass
+from .temperature import Temperature
+from .mass import Mass
 from .coords import Coords
-from .speed_3d import SpeedVector
+from .velocity import Velocity
 from .meters_per_second import MetersPerSecond
 from .constants import GAS_CONSTANT, EARTH_GRAVITY

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from ...universal.kilograms_mass import KilogramMass
+from domain.universal.mass import Mass
 
 
 class FuelType(str, Enum):
@@ -16,7 +16,7 @@ class FuelType(str, Enum):
 @dataclass(slots=True)
 class Fuel:
     type: FuelType
-    _mass: KilogramMass
+    _mass: Mass
 
     @property
     def mass(self) -> float:
@@ -27,4 +27,7 @@ class Fuel:
 
     @classmethod
     def from_kg(cls, fuel_type: FuelType, initial_mass_in_kg: float) -> "Fuel":
-        return cls(type=fuel_type, _mass=KilogramMass.from_kg(initial_mass_in_kg))
+        if initial_mass_in_kg < 0:
+            raise ValueError("Fuel cannot be negative")
+        
+        return cls(type=fuel_type, _mass=Mass.from_kg(initial_mass_in_kg))

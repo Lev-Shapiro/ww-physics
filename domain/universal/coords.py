@@ -12,3 +12,7 @@ class Coords:
     @classmethod
     def xyz(cls, x: float, y: float, z: float) -> "Coords":
         return cls(x=x, y=y, z=z)
+
+    @classmethod
+    def zero(cls) -> "Coords":
+        return cls(x=0.0, y=0.0, z=0.0)

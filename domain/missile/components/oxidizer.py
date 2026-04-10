@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from ...universal.kilograms_mass import KilogramMass
+from domain.universal.mass import Mass
 
 
 class OxidizerType(str, Enum):
@@ -13,7 +13,7 @@ class OxidizerType(str, Enum):
 @dataclass(slots=True)
 class Oxidizer:
     type: OxidizerType
-    _mass: KilogramMass
+    _mass: Mass
 
     @property
     def mass(self) -> float:
@@ -24,4 +24,4 @@ class Oxidizer:
 
     @classmethod
     def from_kg(cls, oxidizer_type: OxidizerType, initial_mass_in_kg: float) -> "Oxidizer":
-        return cls(type=oxidizer_type, _mass=KilogramMass.from_kg(initial_mass_in_kg))
+        return cls(type=oxidizer_type, _mass=Mass.from_kg(initial_mass_in_kg))
