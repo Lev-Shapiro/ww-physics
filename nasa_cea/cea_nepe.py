@@ -10,8 +10,10 @@ from nasa_cea.cea_calculator import CEACalculator
 from rocketcea.cea_obj import CEA_Obj, add_new_propellant
 
 
-def _nepe_component_mass_fractions(mixture: SolidPropellantMixture) -> tuple[float, float, float, float]:
-    """Return mass fractions (0–100) for Al, AP, HMX, and HTPB for a validated NEPE mixture."""
+def _nepe_component_mass_fractions(
+    mixture: SolidPropellantMixture,
+) -> tuple[float, float, float, float, float]:
+    """Return mass fractions (0–100) for Al, AP, HMX, HTPB, and BTTN for a validated NEPE mixture."""
     if mixture.type is not SolidPropellantType.NEPE:
         raise ValueError("CEA NEPE calculator requires SolidPropellantType.NEPE.")
 
@@ -29,17 +31,18 @@ def _nepe_component_mass_fractions(mixture: SolidPropellantMixture) -> tuple[flo
     if not mixture.fuels:
         raise ValueError("NEPE mixture must include fuels (aluminum, HTPB, and HMX).")
 
-    allowed_fuels = frozenset({FuelType.ALUMINUM_POWDER, FuelType.HTPB, FuelType.HMX})
+    allowed_fuels = frozenset({FuelType.ALUMINUM_POWDER, FuelType.HTPB, FuelType.HMX, FuelType.BTTN})
     bad_fuels = [f for f in mixture.fuels if f.type not in allowed_fuels]
     if bad_fuels:
         raise ValueError(
-            "NEPE RocketCEA model only supports aluminum powder, HTPB, and HMX fuels; "
+            "NEPE RocketCEA model only supports aluminum powder, HTPB, HMX, and BTTN fuels; "
             f"got: {sorted({f.type.value for f in bad_fuels})}"
         )
 
     al_mass = sum(f.mass for f in mixture.fuels if f.type is FuelType.ALUMINUM_POWDER)
     htpb_mass = sum(f.mass for f in mixture.fuels if f.type is FuelType.HTPB)
     hmx_mass = sum(f.mass for f in mixture.fuels if f.type is FuelType.HMX)
+    bttn_mass = sum(f.mass for f in mixture.fuels if f.type is FuelType.BTTN)
     ap_mass = sum(o.mass for o in mixture.oxidizers)
 
     if al_mass <= 0 or htpb_mass <= 0 or hmx_mass <= 0 or ap_mass <= 0:
@@ -51,16 +54,17 @@ def _nepe_component_mass_fractions(mixture: SolidPropellantMixture) -> tuple[flo
     ap_pct = (ap_mass / total) * 100.0
     htpb_pct = (htpb_mass / total) * 100.0
     hmx_pct = (hmx_mass / total) * 100.0
-    return al_pct, ap_pct, hmx_pct, htpb_pct
+    bttn_pct = (bttn_mass / total) * 100.0
+    return al_pct, ap_pct, hmx_pct, htpb_pct, bttn_pct
 
 
 class CEANEPE(CEACalculator):
-    """NEPE thermodynamic model from RocketCEA, for HMX/AP/Al/HTPB propellants (e.g. Trident II D5).
+    """NEPE thermodynamic model from RocketCEA, for HMX/AP/Al/HTPB/BTTN propellants (e.g. Trident II D5).
 
-    NEPE (Nitrate Ester Plasticized Polyether) is a high-energy solid propellant used in advanced
-    ballistic missiles. HMX provides additional energy density over standard APCP. The BTTN
-    nitrate ester plasticizer (typically ~5%) is absorbed into the HTPB binder fraction for
-    this model.
+    NEPE (Nitrate Ester Plasticized Polyether) derives its advantage over APCP from two sources:
+    - HMX provides additional combustion energy as an energetic filler.
+    - BTTN (butanetriol trinitrate, C4H7N3O9) is the nitrate ester plasticizer; it is oxygen-rich
+      and substantially improves the overall O/F balance relative to APCP at equivalent AP loading.
     """
 
     _mixture: SolidPropellantMixture
@@ -74,11 +78,20 @@ class CEANEPE(CEACalculator):
         return self._mixture
 
     def _build_cea_obj(self) -> CEA_Obj:
-        al_pct, ap_pct, hmx_pct, htpb_pct = _nepe_component_mass_fractions(self._mixture)
+        al_pct, ap_pct, hmx_pct, htpb_pct, bttn_pct = _nepe_component_mass_fractions(self._mixture)
 
         propellant_name = (
-            f"NEPE_{al_pct:.4f}_{ap_pct:.4f}_{hmx_pct:.4f}_{htpb_pct:.4f}".replace(".", "_")
+            f"NEPE_{al_pct:.3f}_{ap_pct:.3f}_{hmx_pct:.3f}_{htpb_pct:.3f}_{bttn_pct:.3f}"
+            .replace(".", "_")
         )
+
+        bttn_line = ""
+        if bttn_pct > 0:
+            # BTTN: C4H7N3O9, ΔHf ≈ -145 kcal/mol, ρ = 1.52 g/cm³
+            bttn_line = f"""fuel BTTN  C 4 H 7 N 3 O 9    wt%={bttn_pct}
+h,cal=-145000.0 t(k)=298.15 rho=1.52
+"""
+
         card = f"""
 oxidizer NH4CLO4(I)   wt%={ap_pct}
 h,cal=-70690.0 t(k)=298.15 rho=1.95
@@ -88,7 +101,7 @@ fuel Aluminum  AL 1       wt%={al_pct}
 h,cal=0.0     t(k)=298.15
 fuel HMX  C 4 H 8 N 8 O 8    wt%={hmx_pct}
 h,cal=17200.0 t(k)=298.15 rho=1.91
-"""
+{bttn_line}"""
         try:
             add_new_propellant(propellant_name, card)
         except Exception:

@@ -6,23 +6,21 @@ from domain.universal.pressure import PsiaPressure
 
 
 def main() -> None:
-    missiles = [
-        MissileFactory.create_test_missile(name="Standard Missile"),
-        MissileFactory.create_advanced_interceptor(name="Advanced Interceptor"),
-        MissileFactory.create_tamir(),
-        MissileFactory.create_trident_ii_d5(),
-        MissileFactory.create_arrow3(),
+    simulations = [
+        (MissileFactory.create_tamir(), PsiaPressure(psia=1000)),
+        (MissileFactory.create_trident_ii_d5(), PsiaPressure(psia=1800)),
+        (MissileFactory.create_arrow3(), PsiaPressure(psia=1200)),
     ]
 
-    for missile in missiles:
-        run_simulation(missile)
+    for missile, pressure in simulations:
+        run_simulation(missile, pressure)
 
 
-def run_simulation(missile: Missile) -> None:
+def run_simulation(missile: Missile, chamber_pressure: PsiaPressure) -> None:
     if missile.propellant.type is SolidPropellantType.NEPE:
-        boosting_phase = BoostingMissilePhase.from_nepe(missile, chamber_pressure=PsiaPressure(psia=1000))
+        boosting_phase = BoostingMissilePhase.from_nepe(missile, chamber_pressure=chamber_pressure)
     else:
-        boosting_phase = BoostingMissilePhase.from_apcp(missile, chamber_pressure=PsiaPressure(psia=1000))
+        boosting_phase = BoostingMissilePhase.from_apcp(missile, chamber_pressure=chamber_pressure)
 
     print("--------------------------------")
     print(f"Launching {missile.name} ({missile.structure.dry_mass:.2f}/{missile.mass:.2f}kg)")

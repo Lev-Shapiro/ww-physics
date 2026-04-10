@@ -53,15 +53,20 @@ class StructureFactory:
 
     @staticmethod
     def create_arrow3_structure() -> MissileStructure:
-        """Arrow 3 boost-stage structure. ~120 kg dry mass."""
+        """Arrow 3 boost-stage structure. ~60 kg dry mass.
+
+        Arrow 3 uses lightweight carbon-composite construction and a hit-to-kill kinetic vehicle
+        (no blast warhead), keeping dry mass lean relative to propellant.
+        Mass fraction: 180 kg propellant / 240 kg total = 75%.
+        """
         return MissileStructure(
             burning_surface_area=0.3,
             nozzle_throat_area=0.005,
-            casing_mass=Mass.from_kg(40.0),
-            nozzle_mass=Mass.from_kg(20.0),
-            electronics_mass=Mass.from_kg(30.0),
-            payload_mass=Mass.from_kg(15.0),
-            structural_mass=Mass.from_kg(15.0),
+            casing_mass=Mass.from_kg(20.0),
+            nozzle_mass=Mass.from_kg(10.0),
+            electronics_mass=Mass.from_kg(20.0),
+            payload_mass=Mass.from_kg(5.0),
+            structural_mass=Mass.from_kg(5.0),
         )
 
     @staticmethod

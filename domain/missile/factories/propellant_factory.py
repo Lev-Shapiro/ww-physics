@@ -54,22 +54,25 @@ class PropellantFactory:
 
     @staticmethod
     def create_trident_ii_d5_stage1() -> SolidPropellantMixture:
-        """Trident II D5 Stage 1 NEPE-75 propellant — HMX/AP/Al/HTPB.
+        """Trident II D5 Stage 1 NEPE-75 propellant — HMX/AP/Al/HTPB/BTTN.
 
         Composition from public-domain sources (FAS, Jane's) for Thiokol/ATK NEPE-75:
-        44% AP, 20% Al, 19% HMX, 17% HTPB (BTTN plasticizer absorbed into binder fraction).
+        44% AP, 20% Al, 19% HMX, 12% HTPB, 5% BTTN.
+        BTTN (butanetriol trinitrate, C4H7N3O9) is the oxygen-rich nitrate ester plasticizer
+        that gives NEPE its performance edge over APCP — it must be modeled explicitly.
         Stage 1 propellant load: ~25,000 kg.
         """
         propellant_mass_kg = 25_000.0
 
         al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.20)
-        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.17)
+        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.12)
         hmx_fuel = Fuel.from_kg(FuelType.HMX, propellant_mass_kg * 0.19)
+        bttn_fuel = Fuel.from_kg(FuelType.BTTN, propellant_mass_kg * 0.05)
         ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.44)
 
         return SolidPropellantMixture.mix(
             type=SolidPropellantType.NEPE,
-            fuels=(al_fuel, htpb_fuel, hmx_fuel),
+            fuels=(al_fuel, htpb_fuel, hmx_fuel, bttn_fuel),
             oxidizers=(ap_ox,)
         )
 
