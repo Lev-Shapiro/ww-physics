@@ -8,6 +8,8 @@ from domain.universal.mass import Mass
 
 class OxidizerType(str, Enum):
     AMMONIUM_PERCHLORATE = "AP"
+    POTASSIUM_NITRATE = "KNO3"
+    LIQUID_OXYGEN = "LOX"
 
 
 @dataclass(slots=True)

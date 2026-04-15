@@ -2,22 +2,22 @@ from __future__ import annotations
 
 from domain.missile.components.fuel import FuelType
 from domain.missile.components.oxidizer import OxidizerType
-from domain.missile.components.solid_propellant_mixture import SolidPropellantMixture
-from domain.missile.components.solid_propellant_type import SolidPropellantType
+from domain.missile.components.propellant_mixture import PropellantMixture
+from domain.missile.components.propellant_type import PropellantType
 from domain.universal.pressure import PsiaPressure
 from nasa_cea.cea_calculator import CEACalculator
 
 from rocketcea.cea_obj import CEA_Obj, add_new_propellant
 
 
-def _apcp_component_mass_fractions(mixture: SolidPropellantMixture) -> tuple[float, float, float]:
+def _apcp_component_mass_fractions(mixture: PropellantMixture) -> tuple[float, float, float]:
     """Return mass fractions (0–100) for Al, AP, and HTPB for a validated APCP mixture."""
-    if mixture.type is not SolidPropellantType.APCP:
-        raise ValueError("CEA APCP calculator requires SolidPropellantType.APCP.")
+    if mixture.type is not PropellantType.APCP:
+        raise ValueError("CEA APCP calculator requires PropellantType.APCP.")
 
     total = mixture.mass
     if total <= 0:
-        raise ValueError("Solid propellant mixture must have positive total mass.")
+        raise ValueError("Propellant mixture must have positive total mass.")
 
     if not mixture.oxidizers:
         raise ValueError("APCP mixture must include at least one oxidizer (ammonium perchlorate).")
@@ -53,16 +53,16 @@ def _apcp_component_mass_fractions(mixture: SolidPropellantMixture) -> tuple[flo
 
 
 class CEAAPCP(CEACalculator):
-    """APCP thermodynamic model from RocketCEA, driven by a domain SolidPropellantMixture."""
+    """APCP thermodynamic model from RocketCEA, driven by a domain PropellantMixture."""
 
-    _mixture: SolidPropellantMixture
+    _mixture: PropellantMixture
 
-    def __init__(self, mixture: SolidPropellantMixture, chamber_pressure: PsiaPressure) -> None:
+    def __init__(self, mixture: PropellantMixture) -> None:
         self._mixture = mixture
-        super().__init__(chamber_pressure=chamber_pressure)
+        super().__init__(chamber_pressure=mixture.chamber_pressure)
 
     @property
-    def mixture(self) -> SolidPropellantMixture:
+    def mixture(self) -> PropellantMixture:
         return self._mixture
 
     def _build_cea_obj(self) -> CEA_Obj:
