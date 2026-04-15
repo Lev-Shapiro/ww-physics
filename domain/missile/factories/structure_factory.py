@@ -39,10 +39,10 @@ class StructureFactory:
             burning_surface_area=1.0,  # Approximate
             nozzle_throat_area=0.05,  # Approximate
             casing_mass=Mass.from_kg(1000),
-            nozzle_mass=Mass.from_kg(500),
+            nozzle_mass=Mass.from_kg(300),
             electronics_mass=Mass.from_kg(200),
             payload_mass=Mass.from_kg(1000),  # Warhead
-            structural_mass=Mass.from_kg(2100),
-            # Fuel: 8000kg, rest: 4800kg
+            structural_mass=Mass.from_kg(1500),
+            # Fuel: 8700kg, warhead: 1000kg, rest: 3000kg
             # Total: 12800kg
         )
