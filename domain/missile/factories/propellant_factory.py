@@ -1,97 +1,55 @@
 from domain.missile.components.fuel import Fuel, FuelType
 from domain.missile.components.oxidizer import Oxidizer, OxidizerType
-from domain.missile.components.solid_propellant_mixture import SolidPropellantMixture
-from domain.missile.components.solid_propellant_type import SolidPropellantType
+from domain.missile.components.propellant_mixture import PropellantMixture
+from domain.missile.components.propellant_type import PropellantType
+from domain.universal.pressure import PsiaPressure
 
 
 class PropellantFactory:
     @staticmethod
-    def create_apcp() -> SolidPropellantMixture:
-        propellant_mass_kg = 10
-
-        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.16)
-        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.125)
-        ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.715)
-
-        return SolidPropellantMixture.mix(
-            type=SolidPropellantType.APCP,
-            fuels=(al_fuel, htpb_fuel),
-            oxidizers=(ap_ox,)
-        )
-
-    @staticmethod
-    def create_high_performance_apcp() -> SolidPropellantMixture:
-        propellant_mass_kg = 100
-
-        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.20)
-        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.10)
-        ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.70)
-
-        return SolidPropellantMixture.mix(
-            type=SolidPropellantType.APCP,
-            fuels=(al_fuel, htpb_fuel),
-            oxidizers=(ap_ox,)
-        )
-
-    @staticmethod
-    def create_tamir() -> SolidPropellantMixture:
+    def create_tamir() -> PropellantMixture:
         """Tamir interceptor (Iron Dome) solid propellant — AP/Al/HTPB, ~90 kg missile total.
 
         Composition based on open-source literature for Rafael tactical interceptor motors:
         68% AP, 18% Al, 14% HTPB.
         """
-        propellant_mass_kg = 60.0
+        propellant_mass_kg = 50.0
 
-        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.18)
+        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.16)
         htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.14)
         ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.68)
 
-        return SolidPropellantMixture.mix(
-            type=SolidPropellantType.APCP,
+        return PropellantMixture.mix(
+            type=PropellantType.APCP,
             fuels=(al_fuel, htpb_fuel),
-            oxidizers=(ap_ox,)
+            oxidizers=(ap_ox,),
+            chamber_pressure=PsiaPressure(psia=2000)
         )
 
     @staticmethod
-    def create_trident_ii_d5_stage1() -> SolidPropellantMixture:
-        """Trident II D5 Stage 1 NEPE-75 propellant — HMX/AP/Al/HTPB/BTTN.
+    def create_qassam() -> PropellantMixture:
+        """Qassam-class unguided rocket propellant modeled as KNSU (sugar propellant)."""
+        propellant_mass_kg = 20.0
 
-        Composition from public-domain sources (FAS, Jane's) for Thiokol/ATK NEPE-75:
-        44% AP, 20% Al, 19% HMX, 12% HTPB, 5% BTTN.
-        BTTN (butanetriol trinitrate, C4H7N3O9) is the oxygen-rich nitrate ester plasticizer
-        that gives NEPE its performance edge over APCP — it must be modeled explicitly.
-        Stage 1 propellant load: ~25,000 kg.
-        """
-        propellant_mass_kg = 25_000.0
+        sugar_fuel = Fuel.from_kg(FuelType.SUGAR, propellant_mass_kg * 0.35)
+        kno3_ox = Oxidizer.from_kg(OxidizerType.POTASSIUM_NITRATE, propellant_mass_kg * 0.65)
 
-        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.20)
-        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.12)
-        hmx_fuel = Fuel.from_kg(FuelType.HMX, propellant_mass_kg * 0.19)
-        bttn_fuel = Fuel.from_kg(FuelType.BTTN, propellant_mass_kg * 0.05)
-        ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.44)
-
-        return SolidPropellantMixture.mix(
-            type=SolidPropellantType.NEPE,
-            fuels=(al_fuel, htpb_fuel, hmx_fuel, bttn_fuel),
-            oxidizers=(ap_ox,)
+        return PropellantMixture.mix(
+            type=PropellantType.KNSU,
+            fuels=(sugar_fuel,),
+            oxidizers=(kno3_ox,),
+            chamber_pressure=PsiaPressure(psia=350)
         )
 
     @staticmethod
-    def create_arrow3() -> SolidPropellantMixture:
-        """Arrow 3 boost-stage solid propellant — high-energy AP/Al/HTPB.
+    def create_v2() -> PropellantMixture:
+        """V-2 rocket liquid propellant — Ethanol and Liquid Oxygen."""
+        ethanol_fuel = Fuel.from_kg(FuelType.ETHANOL, 4900)
+        lox_ox = Oxidizer.from_kg(OxidizerType.LIQUID_OXYGEN, 3800)
 
-        Arrow 3 uses a high-energy solid propellant for exoatmospheric intercept.
-        Estimated composition based on high-performance interceptor motors: 70% AP, 20% Al, 10% HTPB.
-        Boost stage propellant load: ~180 kg.
-        """
-        propellant_mass_kg = 180.0
-
-        al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.20)
-        htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.10)
-        ap_ox = Oxidizer.from_kg(OxidizerType.AMMONIUM_PERCHLORATE, propellant_mass_kg * 0.70)
-
-        return SolidPropellantMixture.mix(
-            type=SolidPropellantType.APCP,
-            fuels=(al_fuel, htpb_fuel),
-            oxidizers=(ap_ox,)
+        return PropellantMixture.mix(
+            type=PropellantType.LIQUID,
+            fuels=(ethanol_fuel,),
+            oxidizers=(lox_ox,),
+            chamber_pressure=PsiaPressure(psia=1500)  # Approximate chamber pressure
         )

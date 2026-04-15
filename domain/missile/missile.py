@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.missile.components.solid_propellant_mixture import SolidPropellantMixture
+from domain.missile.components.propellant_mixture import PropellantMixture
 from domain.universal.coords import Coords
 from domain.universal.efficiency_factor import EfficiencyFactor
 from domain.universal.mass import Mass
@@ -31,7 +31,7 @@ class MissileStructure:
 
 class Missile:
     name: str 
-    propellant: SolidPropellantMixture 
+    propellant: PropellantMixture 
     structure: MissileStructure 
     efficiency_factor: EfficiencyFactor
    
@@ -39,7 +39,7 @@ class Missile:
     coords: Coords
     velocity: Velocity
     
-    def __init__(self, name: str, propellant: SolidPropellantMixture, structure: MissileStructure, efficiency: EfficiencyFactor, coords: Coords, velocity: Velocity):
+    def __init__(self, name: str, propellant: PropellantMixture, structure: MissileStructure, efficiency: EfficiencyFactor, coords: Coords, velocity: Velocity):
         self.name = name
         self.propellant = propellant
         self.structure = structure

@@ -8,6 +8,8 @@ from domain.universal.pressure import PsiaPressure
 from domain.universal.time import Time
 from nasa_cea.cea_apcp import CEAAPCP
 from nasa_cea.cea_calculator import CEACalculator
+from nasa_cea.cea_knsu import CEAKNSU
+from nasa_cea.cea_liquid import CEALiquid
 from nasa_cea.cea_nepe import CEANEPE
 
 class BoostingMissilePhase:
@@ -95,11 +97,21 @@ class BoostingMissilePhase:
           pass
 
     @staticmethod
-    def from_apcp(missile: Missile, chamber_pressure: PsiaPressure = PsiaPressure(psia=1000)) -> BoostingMissilePhase:
-        cea_calculator = CEAAPCP(missile.propellant, chamber_pressure)
+    def from_apcp(missile: Missile) -> BoostingMissilePhase:
+        cea_calculator = CEAAPCP(missile.propellant)
         return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
 
     @staticmethod
-    def from_nepe(missile: Missile, chamber_pressure: PsiaPressure = PsiaPressure(psia=1000)) -> BoostingMissilePhase:
-        cea_calculator = CEANEPE(missile.propellant, chamber_pressure)
+    def from_nepe(missile: Missile) -> BoostingMissilePhase:
+        cea_calculator = CEANEPE(missile.propellant)
+        return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
+
+    @staticmethod
+    def from_knsu(missile: Missile) -> BoostingMissilePhase:
+        cea_calculator = CEAKNSU(missile.propellant)
+        return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
+
+    @staticmethod
+    def from_liquid(missile: Missile) -> BoostingMissilePhase:
+        cea_calculator = CEALiquid(missile.propellant)
         return BoostingMissilePhase(missile=missile, cea_calculator=cea_calculator)
