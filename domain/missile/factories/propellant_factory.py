@@ -2,7 +2,7 @@ from domain.missile.components.fuel import Fuel, FuelType
 from domain.missile.components.oxidizer import Oxidizer, OxidizerType
 from domain.missile.components.propellant_mixture import PropellantMixture
 from domain.missile.components.propellant_type import PropellantType
-from domain.universal.pressure import PsiaPressure
+from domain.universal.pressure import Pressure
 
 
 class PropellantFactory:
@@ -23,7 +23,7 @@ class PropellantFactory:
             type=PropellantType.APCP,
             fuels=(al_fuel, htpb_fuel),
             oxidizers=(ap_ox,),
-            chamber_pressure=PsiaPressure(psia=2000)
+            chamber_pressure=Pressure(psia=2000)
         )
 
     @staticmethod
@@ -38,7 +38,7 @@ class PropellantFactory:
             type=PropellantType.KNSU,
             fuels=(sugar_fuel,),
             oxidizers=(kno3_ox,),
-            chamber_pressure=PsiaPressure(psia=350)
+            chamber_pressure=Pressure(psia=350)
         )
 
     @staticmethod
@@ -51,5 +51,5 @@ class PropellantFactory:
             type=PropellantType.LIQUID,
             fuels=(ethanol_fuel,),
             oxidizers=(lox_ox,),
-            chamber_pressure=PsiaPressure(psia=1500)  # Approximate chamber pressure
+            chamber_pressure=Pressure(psia=1500)  # Approximate chamber pressure
         )

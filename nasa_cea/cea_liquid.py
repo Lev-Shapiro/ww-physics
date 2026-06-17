@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from domain.missile.components.propellant_mixture import PropellantMixture
 from domain.missile.components.propellant_type import PropellantType
-from domain.universal.pressure import PsiaPressure
+from domain.universal.pressure import Pressure
 from nasa_cea.cea_calculator import CEACalculator
 
 from rocketcea.cea_obj import CEA_Obj

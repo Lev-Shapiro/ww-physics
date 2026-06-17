@@ -1,5 +1,6 @@
 # Universal gas constant [J/(mol*K)]
-GAS_CONSTANT = 8.314462618
+from domain.universal.pressure import Pressure
 
-# Standard gravity [m/s^2]
-EARTH_GRAVITY = 9.80665
+GAS_CONSTANT = 8.314462618
+EARTH_GRAVITY = 9.80665 # Standard gravity [m/s^2]
+SEA_LEVEL_PRESSURE = Pressure(psia=14.7)
