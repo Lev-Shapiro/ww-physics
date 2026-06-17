@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.universal.pressure import PsiaPressure
+from domain.universal.pressure import Pressure
 
 from .fuel import Fuel
 from .oxidizer import Oxidizer
@@ -14,7 +14,7 @@ class PropellantMixture:
     type: PropellantType
     fuels: tuple[Fuel, ...]
     oxidizers: tuple[Oxidizer, ...]
-    chamber_pressure: PsiaPressure
+    chamber_pressure: Pressure
     
     @property
     def mass(self) -> float:
@@ -43,5 +43,5 @@ class PropellantMixture:
             oxidizer.use(oxidizer.mass * relative_mass_ratio)
 
     @classmethod
-    def mix(cls, type: PropellantType, fuels: tuple[Fuel, ...], oxidizers: tuple[Oxidizer, ...], chamber_pressure: PsiaPressure) -> "PropellantMixture":
+    def mix(cls, type: PropellantType, fuels: tuple[Fuel, ...], oxidizers: tuple[Oxidizer, ...], chamber_pressure: Pressure) -> "PropellantMixture":
         return cls(type=type, fuels=fuels, oxidizers=oxidizers, chamber_pressure=chamber_pressure)
