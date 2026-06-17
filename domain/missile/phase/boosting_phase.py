@@ -4,6 +4,7 @@ import math
 from domain.formulas.exhaust_velocity import ExhaustVelocityThermochemicalFormula
 from domain.missile.missile import Missile
 from domain.universal.constants import EARTH_GRAVITY
+from domain.universal.pressure import PsiaPressure
 from domain.universal.time import Time
 from nasa_cea.cea_apcp import CEAAPCP
 from nasa_cea.cea_calculator import CEACalculator
@@ -20,7 +21,7 @@ class BoostingMissilePhase:
     def __init__(self, missile: Missile, cea_calculator: CEACalculator):
         self.missile = missile
         self.calculator = cea_calculator
-        
+    
     @property
     def chamber_density(self):
       return self.calculator.chamber_density
@@ -67,11 +68,11 @@ class BoostingMissilePhase:
     def specific_impulse(self):
         return self.exhaust_velocity / EARTH_GRAVITY
         
-    def burn(self, time: Time) -> bool:
+    def __burn(self, time_elapsed: Time) -> bool:
       if self.missile.propellant.mass <= 0:
           return True
-        
-      relative_mass_flow_rate = self.mass_flow_rate * time.seconds
+
+      relative_mass_flow_rate = self.mass_flow_rate * time_elapsed.seconds
       
       if relative_mass_flow_rate >= self.missile.propellant.mass:
           relative_mass_flow_rate = self.missile.propellant.mass
@@ -84,9 +85,16 @@ class BoostingMissilePhase:
           velocity_change = self.exhaust_velocity * math.log(
             initial_mass / final_mass
           )
-          self.missile.velocity.y.add(velocity_change)
+          self.missile.velocity.z.add(velocity_change)
+      else:
+        return True
           
       return False
+            
+    def burn(self):
+      time_step = Time.from_seconds(0.1) # 100ms
+      while not self.__burn(time_step):
+          pass
 
     @staticmethod
     def from_apcp(missile: Missile) -> BoostingMissilePhase:

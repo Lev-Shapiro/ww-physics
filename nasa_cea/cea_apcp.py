@@ -4,7 +4,7 @@ from domain.missile.components.fuel import FuelType
 from domain.missile.components.oxidizer import OxidizerType
 from domain.missile.components.propellant_mixture import PropellantMixture
 from domain.missile.components.propellant_type import PropellantType
-from domain.universal.pressure import Pressure
+from domain.universal.pressure import PsiaPressure
 from nasa_cea.cea_calculator import CEACalculator
 
 from rocketcea.cea_obj import CEA_Obj, add_new_propellant

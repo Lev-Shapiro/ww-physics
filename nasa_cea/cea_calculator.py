@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from domain.universal.pressure import Pressure
+from domain.universal.pressure import PsiaPressure
 from domain.universal.temperature import Temperature
 from rocketcea.cea_obj import CEA_Obj
 
@@ -13,10 +13,10 @@ _LBM_PER_FT3_TO_KG_PER_M3 = 0.45359237 / (0.3048**3)
 class CEACalculator(ABC):
     """RocketCEA-backed equilibrium properties; subclasses supply propellant from domain models."""
 
-    _chamber_pressure: Pressure
+    _chamber_pressure: PsiaPressure
     __cea_obj: CEA_Obj
 
-    def __init__(self, chamber_pressure: Pressure) -> None:
+    def __init__(self, chamber_pressure: PsiaPressure) -> None:
         self._chamber_pressure = chamber_pressure
         self.__cea_obj = self._build_cea_obj()
 
@@ -35,7 +35,7 @@ class CEACalculator(ABC):
         return float(mw)
 
     @property
-    def chamber_pressure(self) -> Pressure:
+    def chamber_pressure(self) -> PsiaPressure:
         return self._chamber_pressure
     
     @property

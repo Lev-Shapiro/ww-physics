@@ -1,7 +1,6 @@
 from __future__ import annotations
 import math
 from dataclasses import dataclass
-from domain.universal.velocity import Velocity
 
 @dataclass(frozen=True, slots=True)
 class NormalizedVelocity:
@@ -9,7 +8,7 @@ class NormalizedVelocity:
     y: int
     z: int
 
-    def __init__(self, x: int, y: int, z: int):
+    __init__(self, int x, int y, int z):
         if math.sqrt(x**2 + y**2 + z**2) != 1:
             raise Exception("Total normalized vector magnitude must be 1")
         
@@ -18,8 +17,8 @@ class NormalizedVelocity:
         self.z = z
 
     @classmethod
-    def from_velocity(cls, velocity: Velocity) -> "NormalizedVelocity":
-        total = velocity.total.meters_per_second
+    def from_velocity(cls, Velocity velocity) -> "NormalizedVelocity":
+        total = velocity.total
 
         return NormalizedVelocity(
             x=velocity.x.meters_per_second / total,

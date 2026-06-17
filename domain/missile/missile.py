@@ -1,15 +1,35 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from domain.missile.components.propellant_mixture import PropellantMixture
-from domain.moving_object.moving_object import MovingObject
-from domain.universal.constants import EARTH_GRAVITY, GAS_CONSTANT, SEA_LEVEL_PRESSURE
 from domain.universal.coords import Coords
 from domain.universal.efficiency_factor import EfficiencyFactor
-from domain.universal.pressure import Pressure
+from domain.universal.mass import Mass
+from domain.universal.pressure import PsiaPressure
 from domain.universal.velocity import Velocity
-from .missile_structure import MissileStructure
 
-class Missile(MovingObject):
+@dataclass(frozen=True, slots=True)
+class MissileStructure:
+    burning_surface_area: float
+    nozzle_throat_area: float
+    casing_mass: Mass
+    nozzle_mass: Mass
+    electronics_mass: Mass
+    payload_mass: Mass
+    structural_mass: Mass
+    
+    @property
+    def dry_mass(self) -> float:
+        return (
+            self.casing_mass.mass_in_kg +
+            self.nozzle_mass.mass_in_kg +
+            self.electronics_mass.mass_in_kg +
+            self.payload_mass.mass_in_kg +
+            self.structural_mass.mass_in_kg
+        )
+
+class Missile:
     name: str 
     propellant: PropellantMixture 
     structure: MissileStructure 
@@ -32,22 +52,6 @@ class Missile(MovingObject):
         return self.propellant.mass + self.structure.dry_mass
     
     @property
-    def exit_pressure(self) -> Pressure:
-        TEMPEARATURE_LAPSE_RATE = 0.0065 # [K/m]
-        SEA_LEVEL_STANDARD_TEMPERATURE=288.15 # [K]
-        MOLAR_MASS = 0.0289644 # [kg/mol]
-    
-        alt = max(0.0, float(self.coords.y))
-        max_alt_m = SEA_LEVEL_STANDARD_TEMPERATURE / TEMPEARATURE_LAPSE_RATE
-        effective_alt = min(alt, max_alt_m * 0.999)
-
-        temp_delta = (TEMPEARATURE_LAPSE_RATE * effective_alt) / SEA_LEVEL_STANDARD_TEMPERATURE
-        exp = (MOLAR_MASS * EARTH_GRAVITY) / (GAS_CONSTANT * TEMPEARATURE_LAPSE_RATE)
-        
+    def exit_pressure(self):
         # TODO: Shall be dependent on the altitude
-        return Pressure.from_pascals(
-            (SEA_LEVEL_PRESSURE.pascals)*(1-temp_delta)**exp
-        )
-    
-        # Sea-level (easiest way)
-        # return Pressure(psia=14.7)
+        return PsiaPressure(psia=14.7)

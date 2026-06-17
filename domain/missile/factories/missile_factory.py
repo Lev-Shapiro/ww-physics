@@ -5,7 +5,7 @@ from domain.universal.efficiency_factor import EfficiencyFactor
 from domain.universal.coords import Coords
 from domain.universal.velocity import Velocity
 from domain.universal.meters_per_second import MetersPerSecond
-from domain.universal.pressure import Pressure
+from domain.universal.pressure import PsiaPressure
 
 class MissileFactory:
     @staticmethod
