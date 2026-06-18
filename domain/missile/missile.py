@@ -7,6 +7,7 @@ from domain.universal.coords import Coords
 from domain.universal.efficiency_factor import EfficiencyFactor
 from domain.universal.pressure import Pressure
 from domain.universal.velocity import Velocity
+from domain.universal.angle3d import Angle3D
 from .missile_structure import MissileStructure
 
 class Missile(MovingObject):
@@ -19,13 +20,16 @@ class Missile(MovingObject):
     coords: Coords
     velocity: Velocity
     
-    def __init__(self, name: str, propellant: PropellantMixture, structure: MissileStructure, efficiency: EfficiencyFactor, coords: Coords, velocity: Velocity):
+    start_angle: Angle3D
+    
+    def __init__(self, name: str, propellant: PropellantMixture, structure: MissileStructure, efficiency: EfficiencyFactor, coords: Coords, velocity: Velocity, start_angle: Angle3D):
         self.name = name
         self.propellant = propellant
         self.structure = structure
         self.efficiency_factor = efficiency
         self.coords = coords
         self.velocity = velocity
+        self.start_angle = start_angle
         
     @property
     def mass(self) -> float:

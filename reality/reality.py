@@ -29,13 +29,9 @@ class Reality:
     r = Time.from_seconds(self.__update_ms / 1000)
     
     for boosting_phase in self.boosting_phases:
-      finished = boosting_phase.burn(r)
+      velocity_change = boosting_phase.exhaust(r)
       
-      if finished:
-        x = boosting_phase.missile.velocity.x.meters_per_second
-        y = boosting_phase.missile.velocity.y.meters_per_second
-        z = boosting_phase.missile.velocity.z.meters_per_second
-        print(f"Terminal Velocity: ({x:.2f}, {y:.2f}, {z:.2f}) m/s")
+      if velocity_change == 0:
         self.boosting_phases.remove(boosting_phase)
       
     for moving_object in self.moving_objects:      
@@ -48,13 +44,14 @@ class Reality:
         if self.with_gravity:
           moving_object.velocity.y.add(EARTH_GRAVITY * r.seconds * -1)
       else:
+        print(f"Speed: {moving_object.velocity.total.meters_per_second:.2f} m/s")
+        print(f"Coords: {moving_object.coords.x:.2f}, {moving_object.coords.y:.2f}, {moving_object.coords.z:.2f}")
+        
         self.moving_objects.remove(moving_object)
         self.explode_objects.append(moving_object)
       
   def load_missiles_to_simulation(self, missiles: list[Missile]):
     for missile in missiles:
-      self.moving_objects.append(missile)
-      
       if missile.propellant.type is PropellantType.NEPE:
         self.boosting_phases.append(BoostingMissilePhase.from_nepe(missile))
       elif missile.propellant.type is PropellantType.KNSU:
@@ -66,11 +63,14 @@ class Reality:
       else:
         raise ValueError(f"Unknown propellant type: {missile.propellant.type}")
       
+      self.moving_objects.append(missile)
+      
   def start(self, missiles: list[Missile]):
     self.load_missiles_to_simulation(missiles)
       
     while not self.__stop and len(self.moving_objects) > 0:
       self.__update()
+      
       # time.sleep(self.__update_ms / 1000)
       
     self.terminate()

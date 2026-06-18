@@ -1,16 +1,15 @@
 from domain.missile.factories.propellant_factory import PropellantFactory
 from domain.missile.factories.structure_factory import StructureFactory
 from domain.missile.missile import Missile
+from domain.universal.angle3d import Angle3D
 from domain.universal.efficiency_factor import EfficiencyFactor
 from domain.universal.coords import Coords
 from domain.universal.velocity import Velocity
 from domain.universal.meters_per_second import MetersPerSecond
-from domain.universal.pressure import Pressure
 
 class MissileFactory:
     @staticmethod
     def create_tamir(name: str = "Tamir") -> Missile:
-        """Iron Dome Tamir interceptor. ~90 kg total, APCP solid motor."""
         return Missile(
             name=name,
             propellant=PropellantFactory.create_tamir(),
@@ -21,12 +20,13 @@ class MissileFactory:
                 x=MetersPerSecond(0),
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
-            )
+            ),
+            start_angle=Angle3D.from_degrees(0, 45)
         )
 
     @staticmethod
     def create_qassam(name: str = "Qassam") -> Missile:
-        """Qassam-class short-range unguided rocket model."""
+        """short-range unguided rocket model."""
         return Missile(
             name=name,
             propellant=PropellantFactory.create_qassam(),
@@ -37,12 +37,12 @@ class MissileFactory:
                 x=MetersPerSecond(0),
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
-            )
+            ),
+            start_angle=Angle3D.from_degrees(0, 90)
         )
 
     @staticmethod
     def create_v2(name: str = "V-2") -> Missile:
-        """V-2 rocket model."""
         return Missile(
             name=name,
             propellant=PropellantFactory.create_v2(),
@@ -53,5 +53,6 @@ class MissileFactory:
                 x=MetersPerSecond(0),
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
-            )
+            ),
+            start_angle=Angle3D.from_degrees(0, 90)
         )

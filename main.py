@@ -18,15 +18,15 @@ def main() -> None:
 
 def run_simulation(missile: Missile) -> None:
     print("--------------------------------")
-    print(f"Launching {missile.name} ({missile.structure.dry_mass:.2f}/{missile.mass:.2f}kg)")
+    print(f"{missile.name} ({missile.structure.dry_mass:.2f}/{missile.mass:.2f}kg)")
 
     print("\nBurning...")
     
     print(f"Exit Pressure Start: {missile.exit_pressure.psia:.2f} psia")
     
-    update_ms = 40
+    update_ms = 1
     
-    Reality(update_ms, False, True).start([missile])
+    Reality(update_ms, True, True).start([missile])
     
     print(f"Exit Pressure End: {missile.exit_pressure.psia:.2f} psia")
     

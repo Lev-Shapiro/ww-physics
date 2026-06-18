@@ -13,3 +13,7 @@ class MetersPerSecond:
     @classmethod
     def from_kph(cls, kph: float) -> "MetersPerSecond":
         return cls(meters_per_second=kph * 1000 / 3600)
+
+    @classmethod
+    def from_meters_per_second(cls, meters_per_second: float) -> "MetersPerSecond":
+        return cls(meters_per_second=meters_per_second)

@@ -4,6 +4,7 @@ import math
 from domain.formulas.exhaust_velocity import ExhaustVelocityThermochemicalFormula
 from domain.missile.missile import Missile
 from domain.universal.constants import EARTH_GRAVITY
+from domain.universal.meters_per_second import MetersPerSecond
 from domain.universal.time import Time
 from nasa_cea.cea_apcp import CEAAPCP
 from nasa_cea.cea_calculator import CEACalculator
@@ -22,36 +23,16 @@ class BoostingMissilePhase:
         self.calculator = cea_calculator
         
     @property
-    def chamber_density(self):
-      return self.calculator.chamber_density
-    
-    @property
     def chamber_pressure(self):
       return self.calculator.chamber_pressure
          
-    @property
-    def burn_phase_ratio(self):
-      return self.missile.structure.burning_surface_area / self.missile.structure.nozzle_throat_area
-    
     @property
     def inout_pressure_ratio(self):
       return self.chamber_pressure.psia / self.missile.exit_pressure.psia
     
     @property
-    def burn_rate_coefficient(self):
-      return 0.01
-    
-    @property
-    def pressure_exponent(self):
-      return 0.5
-    
-    @property
-    def burn_rate(self):
-      return self.burn_rate_coefficient * (self.chamber_pressure.psia ** self.pressure_exponent)
-    
-    @property
     def mass_flow_rate(self):
-      return self.chamber_density * self.missile.structure.burning_surface_area * self.burn_rate
+      return (self.chamber_pressure.pascals * self.missile.structure.nozzle_throat_area) / self.calculator.characteristic_velocity
     
     @property
     def exhaust_velocity(self):
@@ -67,9 +48,10 @@ class BoostingMissilePhase:
     def specific_impulse(self):
         return self.exhaust_velocity / EARTH_GRAVITY
         
-    def burn(self, time: Time) -> bool:
+    # Output: Velocity change in meters per second
+    def exhaust(self, time: Time) -> float:
       if self.missile.propellant.mass <= 0:
-          return True
+          return 0
         
       relative_mass_flow_rate = self.mass_flow_rate * time.seconds
       
@@ -81,12 +63,15 @@ class BoostingMissilePhase:
       final_mass = self.missile.mass
             
       if initial_mass > final_mass:
-          velocity_change = self.exhaust_velocity * math.log(
-            initial_mass / final_mass
+          velocity_change = MetersPerSecond.from_meters_per_second(
+            self.exhaust_velocity * math.log(
+              initial_mass / final_mass
+            )
           )
-          self.missile.velocity.y.add(velocity_change)
           
-      return False
+          self.missile.velocity.add_tangential_velocity(velocity_change, self.missile.start_angle)
+          
+      return velocity_change
 
     @staticmethod
     def from_apcp(missile: Missile) -> BoostingMissilePhase:
