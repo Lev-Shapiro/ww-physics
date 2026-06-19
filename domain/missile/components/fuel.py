@@ -15,6 +15,7 @@ class FuelType(str, Enum):
     BTTN = "BTTN"
     SUGAR = "SUGAR"
     ETHANOL = "ETHANOL"
+    WATER = "WATER"
 
 
 @dataclass(slots=True)
