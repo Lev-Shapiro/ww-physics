@@ -1,16 +1,25 @@
 from __future__ import annotations
+import uuid
 
 from domain.missile.components.propellant_mixture import PropellantMixture
 from domain.moving_object.moving_object import MovingObject
-from domain.universal.constants import EARTH_GRAVITY, GAS_CONSTANT, SEA_LEVEL_PRESSURE
+from domain.universal.constants import EARTH_GRAVITY, GAS_CONSTANT, MOLAR_MASS, SEA_LEVEL_PRESSURE, SEA_LEVEL_STANDARD_TEMPERATURE, TEMPEARATURE_LAPSE_RATE
 from domain.universal.coords import Coords
 from domain.universal.efficiency_factor import EfficiencyFactor
 from domain.universal.pressure import Pressure
 from domain.universal.velocity import Velocity
 from domain.universal.angle3d import Angle3D
 from .missile_structure import MissileStructure
+from enum import Enum
 
+class MissileState(str, Enum):
+    BOOSTING = "BOOSTING"
+    FLYING = "FLYING"
+    LANDED = "LANDED"
+    EXPLODED = "EXPLODED"
+    
 class Missile(MovingObject):
+    id: str
     name: str 
     propellant: PropellantMixture 
     structure: MissileStructure 
@@ -23,6 +32,7 @@ class Missile(MovingObject):
     start_angle: Angle3D
     
     def __init__(self, name: str, propellant: PropellantMixture, structure: MissileStructure, efficiency: EfficiencyFactor, coords: Coords, velocity: Velocity, start_angle: Angle3D):
+        self.id = uuid.uuid4()
         self.name = name
         self.propellant = propellant
         self.structure = structure
@@ -36,11 +46,7 @@ class Missile(MovingObject):
         return self.propellant.mass + self.structure.dry_mass
     
     @property
-    def exit_pressure(self) -> Pressure:
-        TEMPEARATURE_LAPSE_RATE = 0.0065 # [K/m]
-        SEA_LEVEL_STANDARD_TEMPERATURE=288.15 # [K]
-        MOLAR_MASS = 0.0289644 # [kg/mol]
-    
+    def exit_pressure(self) -> Pressure:    
         alt = max(0.0, float(self.coords.y))
         max_alt_m = SEA_LEVEL_STANDARD_TEMPERATURE / TEMPEARATURE_LAPSE_RATE
         effective_alt = min(alt, max_alt_m * 0.999)
@@ -48,10 +54,10 @@ class Missile(MovingObject):
         temp_delta = (TEMPEARATURE_LAPSE_RATE * effective_alt) / SEA_LEVEL_STANDARD_TEMPERATURE
         exp = (MOLAR_MASS * EARTH_GRAVITY) / (GAS_CONSTANT * TEMPEARATURE_LAPSE_RATE)
         
-        # TODO: Shall be dependent on the altitude
         return Pressure.from_pascals(
             (SEA_LEVEL_PRESSURE.pascals)*(1-temp_delta)**exp
         )
-    
-        # Sea-level (easiest way)
-        # return Pressure(psia=14.7)
+        
+    @property
+    def state(self) -> MissileState:
+        return MissileState.BOOSTING if self.propellant.mass > 0 else MissileState.FLYING if self.coords.y > 2 else MissileState.LANDED

@@ -14,7 +14,7 @@ class MissileFactory:
             name=name,
             propellant=PropellantFactory.create_tamir(),
             structure=StructureFactory.create_tamir_structure(),
-            efficiency=EfficiencyFactor.extremely_high_quality(),
+            efficiency=EfficiencyFactor.from_value(0.92),
             coords=Coords.xyz(0, 0, 0),
             velocity=Velocity(
                 x=MetersPerSecond(0),
@@ -38,21 +38,23 @@ class MissileFactory:
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
             ),
-            start_angle=Angle3D.from_degrees(0, 90)
+            start_angle=Angle3D.from_degrees(0, 45)
         )
 
     @staticmethod
     def create_v2(name: str = "V-2") -> Missile:
+        # 0.88 reflects 1940s combustion instability, turbopump losses, and
+        # mixture-ratio drift — well below a modern optimised engine (0.95+).
         return Missile(
             name=name,
             propellant=PropellantFactory.create_v2(),
             structure=StructureFactory.create_v2_structure(),
-            efficiency=EfficiencyFactor.high_quality(),
+            efficiency=EfficiencyFactor.from_value(0.88),
             coords=Coords.xyz(0, 0, 0),
             velocity=Velocity(
                 x=MetersPerSecond(0),
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
             ),
-            start_angle=Angle3D.from_degrees(0, 90)
+            start_angle=Angle3D.from_degrees(0, 45)
         )

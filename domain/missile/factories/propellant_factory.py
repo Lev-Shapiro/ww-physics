@@ -8,12 +8,7 @@ from domain.universal.pressure import Pressure
 class PropellantFactory:
     @staticmethod
     def create_tamir() -> PropellantMixture:
-        """Tamir interceptor (Iron Dome) solid propellant — AP/Al/HTPB, ~90 kg missile total.
-
-        Composition based on open-source literature for Rafael tactical interceptor motors:
-        68% AP, 18% Al, 14% HTPB.
-        """
-        propellant_mass_kg = 50.0
+        propellant_mass_kg = 28.0
 
         al_fuel = Fuel.from_kg(FuelType.ALUMINUM_POWDER, propellant_mass_kg * 0.16)
         htpb_fuel = Fuel.from_kg(FuelType.HTPB, propellant_mass_kg * 0.14)
@@ -23,12 +18,11 @@ class PropellantFactory:
             type=PropellantType.APCP,
             fuels=(al_fuel, htpb_fuel),
             oxidizers=(ap_ox,),
-            chamber_pressure=Pressure(psia=2000)
+            chamber_pressure=Pressure(psia=1000)
         )
 
     @staticmethod
     def create_qassam() -> PropellantMixture:
-        """Qassam-class unguided rocket propellant modeled as KNSU (sugar propellant)."""
         propellant_mass_kg = 20.0
 
         sugar_fuel = Fuel.from_kg(FuelType.SUGAR, propellant_mass_kg * 0.35)
@@ -43,13 +37,14 @@ class PropellantFactory:
 
     @staticmethod
     def create_v2() -> PropellantMixture:
-        """V-2 rocket liquid propellant — Ethanol and Liquid Oxygen."""
-        ethanol_fuel = Fuel.from_kg(FuelType.ETHANOL, 4900)
-        lox_ox = Oxidizer.from_kg(OxidizerType.LIQUID_OXYGEN, 3800)
+        fuel_mass_kg = 3_810.0
+        ethanol = Fuel.from_kg(FuelType.ETHANOL, fuel_mass_kg * 0.75)  # 2,857.5 kg
+        water = Fuel.from_kg(FuelType.WATER, fuel_mass_kg * 0.25)      #   952.5 kg
+        lox = Oxidizer.from_kg(OxidizerType.LIQUID_OXYGEN, 4_910.0)
 
         return PropellantMixture.mix(
             type=PropellantType.LIQUID,
-            fuels=(ethanol_fuel,),
-            oxidizers=(lox_ox,),
-            chamber_pressure=Pressure(psia=1500)  # Approximate chamber pressure
+            fuels=(ethanol, water),
+            oxidizers=(lox,),
+            chamber_pressure=Pressure(psia=217.6),
         )

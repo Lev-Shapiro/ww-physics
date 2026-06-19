@@ -16,8 +16,9 @@ class CEACalculator(ABC):
     _chamber_pressure: Pressure
     __cea_obj: CEA_Obj
 
-    def __init__(self, chamber_pressure: Pressure) -> None:
+    def __init__(self, chamber_pressure: Pressure, mixture_ratio: float = 1.0) -> None:
         self._chamber_pressure = chamber_pressure
+        self._mixture_ratio = mixture_ratio
         self.__cea_obj = self._build_cea_obj()
 
     @abstractmethod
@@ -29,7 +30,7 @@ class CEACalculator(ABC):
     def molecular_weight(self) -> float:
         mw, _ = self.__cea_obj.get_Chamber_MolWt_gamma(
             Pc=self._chamber_pressure.psia,
-            MR=1.0,
+            MR=self._mixture_ratio,
             eps=10.0,
         )
         return float(mw)
@@ -37,10 +38,12 @@ class CEACalculator(ABC):
     @property
     def chamber_pressure(self) -> Pressure:
         return self._chamber_pressure
-    
+
     @property
     def flame_temperature(self) -> Temperature:
-        t_comb_rankine = self.__cea_obj.get_Tcomb(Pc=self._chamber_pressure.psia, MR=1.0)
+        t_comb_rankine = self.__cea_obj.get_Tcomb(
+            Pc=self._chamber_pressure.psia, MR=self._mixture_ratio
+        )
         t_comb_kelvin = t_comb_rankine * 5.0 / 9.0
         return Temperature.from_kelvin(float(t_comb_kelvin))
 
@@ -48,7 +51,7 @@ class CEACalculator(ABC):
     def gamma(self) -> float:
         _, gamma = self.__cea_obj.get_Chamber_MolWt_gamma(
             Pc=self._chamber_pressure.psia,
-            MR=1.0,
+            MR=self._mixture_ratio,
             eps=10.0,
         )
         return float(gamma)
@@ -57,12 +60,14 @@ class CEACalculator(ABC):
     def chamber_density(self) -> float:
         rho_lbm_per_ft3 = self.__cea_obj.get_Chamber_Density(
             Pc=self._chamber_pressure.psia,
-            MR=1.0,
+            MR=self._mixture_ratio,
             eps=10.0,
         )
         return float(rho_lbm_per_ft3 * _LBM_PER_FT3_TO_KG_PER_M3)
 
     @property
     def characteristic_velocity(self) -> float:
-        c_star_ft_per_second = self.__cea_obj.get_Cstar(Pc=self._chamber_pressure.psia, MR=1.0)
+        c_star_ft_per_second = self.__cea_obj.get_Cstar(
+            Pc=self._chamber_pressure.psia, MR=self._mixture_ratio
+        )
         return float(c_star_ft_per_second * 0.3048)

@@ -1,25 +1,39 @@
+import math
+
 from domain.missile.missile import MissileStructure
 from domain.universal.mass import Mass
 
 class StructureFactory:
     @staticmethod
     def create_tamir_structure() -> MissileStructure:
-        """Tamir interceptor structure. ~28 kg dry mass (casing, nozzle, electronics, warhead)."""
+        """
+        Tamir interceptor structure. ~62 kg dry mass.
+        Total mass (with 28kg fuel) = 90kg.
+        Aerodynamics: Mach-dependent Cd curve between 0.2 and 0.75.
+        """
         return MissileStructure(
             burning_surface_area=0.15,
             nozzle_throat_area=0.002,
-            casing_mass=Mass.from_kg(5.0),
-            nozzle_mass=Mass.from_kg(4.0),
-            electronics_mass=Mass.from_kg(10.0),
+            casing_mass=Mass.from_kg(10.0),
+            nozzle_mass=Mass.from_kg(5.0),
+            electronics_mass=Mass.from_kg(15.0),
             payload_mass=Mass.from_kg(11.0),
-            structural_mass=Mass.from_kg(10.0),
-            # Fuel: 50kg, rest: 40kg
-            # Total: 90kg
+            structural_mass=Mass.from_kg(21.0),
+            drag_curve=(
+                (0.00, 0.25),
+                (0.80, 0.30),
+                (1.00, 0.75),   # transonic peak
+                (1.20, 0.65),
+                (1.50, 0.55),
+                (2.00, 0.45),
+                (3.00, 0.35),
+                (4.50, 0.30),
+            ),
+            cross_section_area=math.pi * 0.08 ** 2,  # 0.0201 m²
         )
 
     @staticmethod
     def create_qassam_structure() -> MissileStructure:
-        """Qassam-class rocket structure. Lightweight steel tube with minimal guidance."""
         return MissileStructure(
             burning_surface_area=0.035,
             nozzle_throat_area=0.00065,
@@ -28,21 +42,37 @@ class StructureFactory:
             electronics_mass=Mass.from_kg(0),
             payload_mass=Mass.from_kg(15),
             structural_mass=Mass.from_kg(30),
-            # Fuel: 20kg, rest: 70kg
-            # Total: 30kg
+            drag_curve=(
+                (0.00, 0.35),
+                (0.80, 0.40),
+                (1.00, 0.85),
+                (1.20, 0.75),
+                (1.50, 0.65),
+                (2.00, 0.55),
+                (3.00, 0.45),
+            ),
+            cross_section_area=math.pi * 0.0575 ** 2,  # 0.0104 m²
         )
 
     @staticmethod
     def create_v2_structure() -> MissileStructure:
-        """V-2 rocket structure. Large liquid propellant rocket."""
         return MissileStructure(
-            burning_surface_area=1.0,  # Approximate
-            nozzle_throat_area=0.05,  # Approximate
+            burning_surface_area=1.0,
+            nozzle_throat_area=0.147,
             casing_mass=Mass.from_kg(1000),
             nozzle_mass=Mass.from_kg(300),
             electronics_mass=Mass.from_kg(200),
-            payload_mass=Mass.from_kg(1000),  # Warhead
+            payload_mass=Mass.from_kg(1000),
             structural_mass=Mass.from_kg(1500),
-            # Fuel: 8700kg, warhead: 1000kg, rest: 3000kg
-            # Total: 12800kg
+            drag_curve=(
+                (0.00, 0.15),
+                (0.80, 0.20),
+                (1.00, 0.55),
+                (1.20, 0.45),
+                (1.50, 0.35),
+                (2.00, 0.25),
+                (3.00, 0.20),
+                (5.00, 0.15),
+            ),
+            cross_section_area=math.pi * 0.8255 ** 2,  # 2.141 m²
         )
