@@ -34,24 +34,29 @@ class StructureFactory:
 
     @staticmethod
     def create_qassam_structure() -> MissileStructure:
+        # Dry mass trimmed 70 -> 64 kg (lighter casing/nozzle and a realistic ~10 kg
+        # warhead) to raise the propellant mass fraction and ideal Δv.
         return MissileStructure(
             burning_surface_area=0.035,
-            nozzle_throat_area=0.00065,
-            casing_mass=Mass.from_kg(15),
-            nozzle_mass=Mass.from_kg(10),
+            nozzle_throat_area=0.00085,  # was 0.00065 — wider throat, faster burn
+            casing_mass=Mass.from_kg(13),
+            nozzle_mass=Mass.from_kg(8),
             electronics_mass=Mass.from_kg(0),
-            payload_mass=Mass.from_kg(15),
-            structural_mass=Mass.from_kg(30),
+            payload_mass=Mass.from_kg(10),
+            structural_mass=Mass.from_kg(33),
+            # Cd curve scaled ~0.55 — the original transonic peak (0.85) was
+            # unrealistically high for a finned rocket and bled most of the coast
+            # range, especially with the wider 170 mm body.
             drag_curve=(
-                (0.00, 0.35),
-                (0.80, 0.40),
-                (1.00, 0.85),
-                (1.20, 0.75),
-                (1.50, 0.65),
-                (2.00, 0.55),
-                (3.00, 0.45),
+                (0.00, 0.193),
+                (0.80, 0.220),
+                (1.00, 0.468),
+                (1.20, 0.413),
+                (1.50, 0.358),
+                (2.00, 0.303),
+                (3.00, 0.248),
             ),
-            cross_section_area=math.pi * 0.0575 ** 2,  # 0.0104 m²
+            cross_section_area=math.pi * 0.085 ** 2,  # 0.022698 m²
         )
 
     @staticmethod

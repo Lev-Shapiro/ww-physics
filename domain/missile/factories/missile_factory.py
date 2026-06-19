@@ -14,14 +14,14 @@ class MissileFactory:
             name=name,
             propellant=PropellantFactory.create_tamir(),
             structure=StructureFactory.create_tamir_structure(),
-            efficiency=EfficiencyFactor.from_value(0.92),
+            efficiency=EfficiencyFactor.from_value(0.85),
             coords=Coords.xyz(0, 0, 0),
             velocity=Velocity(
                 x=MetersPerSecond(0),
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
             ),
-            start_angle=Angle3D.from_degrees(0, 45)
+            start_angle=Angle3D.from_degrees(0, 90)
         )
 
     @staticmethod

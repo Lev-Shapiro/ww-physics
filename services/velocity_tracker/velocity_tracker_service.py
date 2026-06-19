@@ -137,6 +137,15 @@ class VelocityTrackerService:
         comp.append("  │  ", style="dim")
         comp.append(f"Vz {vz:>6.1f}", style="cyan")
         comp.append("  m/s", style="dim")
+        
+        # --- coords ---
+        coords_line = Text()
+        coords_line.append(f"{event.coords.x:>10,.0f} m", style="white")
+        coords_line.append(f"  │  ", style="dim")
+        coords_line.append(f"{event.coords.y:>10,.0f} m", style="white")
+        coords_line.append(f"  │  ", style="dim")
+        coords_line.append(f"{event.coords.z:>10,.0f} m", style="white")
+        coords_line.append("  m", style="dim")
 
         # ── acceleration ──────────────────────────────────────────────────────
         # `accel` = d|v|/dt — rate of change of speed magnitude.
@@ -196,6 +205,8 @@ class VelocityTrackerService:
                 Text(""),
                 sep,
                 comp,
+                sep,
+                coords_line,
                 sep,
                 accel_line,
                 sep,

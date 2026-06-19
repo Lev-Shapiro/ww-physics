@@ -23,7 +23,9 @@ class PropellantFactory:
 
     @staticmethod
     def create_qassam() -> PropellantMixture:
-        propellant_mass_kg = 20.0
+        # 24 kg of KNSU (was 20) lifts the propellant mass fraction toward a real
+        # Qassam-3, raising the ideal Δv ceiling.
+        propellant_mass_kg = 24.0
 
         sugar_fuel = Fuel.from_kg(FuelType.SUGAR, propellant_mass_kg * 0.35)
         kno3_ox = Oxidizer.from_kg(OxidizerType.POTASSIUM_NITRATE, propellant_mass_kg * 0.65)
@@ -32,7 +34,9 @@ class PropellantFactory:
             type=PropellantType.KNSU,
             fuels=(sugar_fuel,),
             oxidizers=(kno3_ox,),
-            chamber_pressure=Pressure(psia=350)
+            # 550 psia (was 350): higher chamber pressure raises mass-flow rate so
+            # the motor burns out in ~7 s instead of ~12 s, cutting gravity losses.
+            chamber_pressure=Pressure(psia=550)
         )
 
     @staticmethod

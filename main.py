@@ -10,8 +10,8 @@ from services.velocity_tracker.velocity_tracker_service import VelocityTrackerSe
 def main() -> None:
     simulations = [
         MissileFactory.create_tamir(),
-        # MissileFactory.create_qassam(),
-        # MissileFactory.create_v2(),
+        MissileFactory.create_qassam(),
+        MissileFactory.create_v2(),
     ]
 
     for missile in simulations:
