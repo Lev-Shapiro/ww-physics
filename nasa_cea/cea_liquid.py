@@ -45,7 +45,8 @@ class CEALiquid(CEACalculator):
     """
     Liquid propellant thermodynamic model (RocketCEA).
 
-    Supports pure ethanol/LOX and water-diluted ethanol/LOX (e.g. V-2).
+    Supports pure ethanol/LOX, water-diluted ethanol/LOX (e.g. V-2), and
+    liquid methane/LOX (e.g. SpaceX Raptor / Starship).
     When a FuelType.WATER component is present in the mixture the fuel blend
     is registered as a custom RocketCEA card.  The oxidiser-to-fuel mass
     ratio derived from the domain mixture is passed to every CEA call so
@@ -70,6 +71,15 @@ class CEALiquid(CEACalculator):
         return self._mixture
 
     def _build_cea_obj(self) -> CEA_Obj:
+        methane_mass = sum(
+            f.mass for f in self._mixture.fuels if f.type is FuelType.METHANE
+        )
+        if methane_mass > 0:
+            # Liquid methane / LOX (e.g. SpaceX Raptor / Starship). RocketCEA
+            # ships a built-in "CH4" fuel card; the O/F passed in __init__ drives
+            # the flame temperature, c*, and γ used downstream.
+            return CEA_Obj(fuelName="CH4", oxName="LOX")
+
         water_mass = sum(
             f.mass for f in self._mixture.fuels if f.type is FuelType.WATER
         )

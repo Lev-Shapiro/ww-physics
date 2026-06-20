@@ -60,6 +60,70 @@ class StructureFactory:
         )
 
     @staticmethod
+    def create_jerico_iron_man_structure() -> MissileStructure:
+        """
+        Fictional Iron Man "Jericho" structure. Large tactical solid-fuel missile
+        (~0.5 m body) carrying a heavy ~600 kg cluster-submunition payload.
+        Dry mass = 350 + 120 + 90 + 600 + 240 = 1400 kg.
+        Total mass (with 1500 kg propellant) = 2900 kg.
+        """
+        return MissileStructure(
+            burning_surface_area=2.5,
+            nozzle_throat_area=0.02,
+            casing_mass=Mass.from_kg(350),
+            nozzle_mass=Mass.from_kg(120),
+            electronics_mass=Mass.from_kg(90),   # guidance for cluster dispersal
+            payload_mass=Mass.from_kg(600),      # cluster of submunitions
+            structural_mass=Mass.from_kg(240),
+            drag_curve=(
+                (0.00, 0.15),
+                (0.80, 0.20),
+                (1.00, 0.55),
+                (1.20, 0.45),
+                (1.50, 0.35),
+                (2.00, 0.25),
+                (3.00, 0.20),
+                (5.00, 0.15),
+            ),
+            cross_section_area=math.pi * 0.25 ** 2,  # 0.196 m²
+        )
+
+    @staticmethod
+    def create_starship_v3_structure() -> MissileStructure:
+        """
+        SpaceX Starship V3 (Block 3) full stack, 9 m diameter, ~124 m tall.
+
+        Single-stage limitation: this model can't stage, so the throat area
+        represents the 33 Super Heavy Raptor 3 engines firing at liftoff
+        (≈1.30 m² total, ≈0.224 m per engine), sized to ~80 MN / ~23,600 kg/s.
+
+        Mass budget (dry ≈ 320 t + 100 t payload = 420 t inert):
+          casing/tanks 140 t, engines 42×1525 kg ≈ 64 t, avionics 5 t,
+          payload 100 t, remaining structure 111 t.
+        Total liftoff mass = 420 t inert + 5,650 t propellant ≈ 6,070 t.
+        """
+        return MissileStructure(
+            burning_surface_area=1.0,        # unused for liquid propellant
+            nozzle_throat_area=1.30,         # 33 booster Raptor 3 throats at liftoff
+            casing_mass=Mass.from_kg(140_000),
+            nozzle_mass=Mass.from_kg(64_050),   # 42 Raptor 3 @ 1,525 kg
+            electronics_mass=Mass.from_kg(5_000),
+            payload_mass=Mass.from_kg(100_000),  # 100 t to LEO
+            structural_mass=Mass.from_kg(111_000),
+            drag_curve=(
+                (0.00, 0.15),
+                (0.80, 0.20),
+                (1.00, 0.55),
+                (1.20, 0.45),
+                (1.50, 0.35),
+                (2.00, 0.25),
+                (3.00, 0.20),
+                (5.00, 0.15),
+            ),
+            cross_section_area=math.pi * 4.5 ** 2,  # 63.617 m² (9 m diameter)
+        )
+
+    @staticmethod
     def create_v2_structure() -> MissileStructure:
         return MissileStructure(
             burning_surface_area=1.0,

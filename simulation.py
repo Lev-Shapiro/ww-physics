@@ -17,8 +17,9 @@ def main() -> None:
         
         Reality(update_ms, True, True, event_bus=event_bus).start([
             MissileFactory.create_tamir(),
-            MissileFactory.create_qassam(),
-            MissileFactory.create_v2(),
+            # MissileFactory.create_qassam(),
+            # MissileFactory.create_v2(),
+            # MissileFactory.create_jerico_iron_man(),
         ])
     except Exception as e:
         print(e)
