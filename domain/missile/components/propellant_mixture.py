@@ -19,6 +19,10 @@ class PropellantMixture:
     @property
     def mass(self) -> float:
         return sum(f.mass for f in self.fuels) + sum(o.mass for o in self.oxidizers)
+    
+    @property
+    def initial_mass(self) -> float:
+        return sum(f.initial_mass for f in self.fuels) + sum(o.initial_mass for o in self.oxidizers)
 
     @property
     def fuel_mass(self) -> float:

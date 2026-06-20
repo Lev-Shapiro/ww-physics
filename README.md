@@ -2,4 +2,4 @@ Personal project with objective of creating an accurate real world representatio
 
 Using NASA CEA (Chemical Equilibrium with Applications) to accurately predict which molecules are being produced from different Fuel + Oxidizer mixes (library: rocketcea)
 
-run `python3 main.py`
+run `python3 simulation.py`

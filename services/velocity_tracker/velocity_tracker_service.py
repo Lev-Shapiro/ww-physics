@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from rich import box
 from rich.align import Align
+from rich.columns import Columns
 from rich.console import Group
 from rich.live import Live
 from rich.panel import Panel
@@ -36,22 +39,18 @@ def _speed_row(
     t.append(f"  {val:>{_VALUE_W},.1f} m/s", style=value_style)
     return t
 
+@dataclass
+class _MissileTrack:
+    peak_speed: float = 0.0
+    prev_speed: float | None = None
+    prev_elapsed_ms: float | None = None
+    panel: Panel | None = None
+
 class VelocityTrackerService:
-    """
-    Live terminal tracker for missile velocity.
-
-    Subscribes to MissileTickEvent via the EventBus and renders a real-time
-    Rich panel showing speed, terminal velocity target, acceleration (with
-    directional colour), component breakdown, fuel and altitude.
-
-    Peak speed and acceleration are not carried on the event; they are derived
-    here by comparing each tick against the previous one.
-    """
-
     def __init__(self, event_bus: EventBus) -> None:
-        self._peak_speed = 0.0
-        self._prev_speed: float | None = None
-        self._prev_elapsed_ms: float | None = None
+        # Keyed by missile_id so several missiles can be tracked concurrently
+        # without sharing peak / acceleration baselines.
+        self._tracks: dict[str, _MissileTrack] = {}
 
         self._live = Live(
             self._idle_panel(),
@@ -65,10 +64,8 @@ class VelocityTrackerService:
 
     def start(self) -> None:
         # Reset per-flight derived state so a reused tracker doesn't carry a
-        # previous missile's peak speed / acceleration baseline into the next run.
-        self._peak_speed = 0.0
-        self._prev_speed = None
-        self._prev_elapsed_ms = None
+        # previous run's peak speed / acceleration baselines into the next run.
+        self._tracks.clear()
         self._live.update(self._idle_panel())
         self._live.start(refresh=True)
 
@@ -78,20 +75,30 @@ class VelocityTrackerService:
     # ── event handling ──────────────────────────────────────────────────────────
 
     def _on_tick(self, event: MissileTickEvent) -> None:
+        track = self._tracks.setdefault(event.missile_id, _MissileTrack())
+
         speed = event.velocity_vector.total.meters_per_second
+        track.peak_speed = max(track.peak_speed, speed)
 
-        self._peak_speed = max(self._peak_speed, speed)
-
-        if self._prev_speed is None or self._prev_elapsed_ms is None:
+        if track.prev_speed is None or track.prev_elapsed_ms is None:
             accel = 0.0
         else:
-            dt = (event.elapsed_ms - self._prev_elapsed_ms) / 1000.0
-            accel = (speed - self._prev_speed) / dt if dt > 0 else 0.0
+            dt = (event.elapsed_ms - track.prev_elapsed_ms) / 1000.0
+            accel = (speed - track.prev_speed) / dt if dt > 0 else 0.0
 
-        self._prev_speed = speed
-        self._prev_elapsed_ms = event.elapsed_ms
+        track.prev_speed = speed
+        track.prev_elapsed_ms = event.elapsed_ms
 
-        self._live.update(self._render(event, speed, accel))
+        track.panel = self._render(event, track, speed, accel)
+
+        self._live.update(self._compose())
+
+    def _compose(self):
+        """Lay every tracked missile's panel side by side in one renderable."""
+        panels = [t.panel for t in self._tracks.values() if t.panel is not None]
+        if not panels:
+            return self._idle_panel()
+        return Columns(panels, equal=True, expand=False)
 
     # ── rendering ─────────────────────────────────────────────────────────────
 
@@ -104,14 +111,14 @@ class VelocityTrackerService:
             width=58,
         )
 
-    def _render(self, event: MissileTickEvent, speed: float, accel: float) -> Panel:
+    def _render(self, event: MissileTickEvent, track: _MissileTrack, speed: float, accel: float) -> Panel:
         vx = event.velocity_vector.x.meters_per_second
         vy = event.velocity_vector.y.meters_per_second
         vz = event.velocity_vector.z.meters_per_second
         altitude = event.coords.y
         is_boosting = event.state == MissileState.BOOSTING
 
-        max_v = max(event.terminal_speed, self._peak_speed, speed, 100.0)
+        max_v = max(event.terminal_speed, track.peak_speed, speed, 100.0)
 
         # ── header ────────────────────────────────────────────────────────────
         phase_style = "bold green" if is_boosting else "bold yellow"
@@ -126,7 +133,7 @@ class VelocityTrackerService:
         # ── speed bars ────────────────────────────────────────────────────────
         speed_row = _speed_row("SPEED", speed, max_v, "█", "bold cyan", "bold white")
         term_row = _speed_row("TERMINAL", event.terminal_speed, max_v, "▬", "dim white", "dim")
-        peak_row = _speed_row("PEAK", self._peak_speed, max_v, "▓", "blue", "blue")
+        peak_row = _speed_row("PEAK", track.peak_speed, max_v, "▓", "blue", "blue")
 
         # ── velocity components ───────────────────────────────────────────────
         comp = Text()

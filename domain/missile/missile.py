@@ -46,6 +46,10 @@ class Missile(MovingObject):
         return self.propellant.mass + self.structure.dry_mass
     
     @property
+    def initial_mass(self) -> float:
+        return self.propellant.initial_mass + self.structure.dry_mass
+    
+    @property
     def exit_pressure(self) -> Pressure:    
         alt = max(0.0, float(self.coords.y))
         max_alt_m = SEA_LEVEL_STANDARD_TEMPERATURE / TEMPEARATURE_LAPSE_RATE
@@ -60,4 +64,4 @@ class Missile(MovingObject):
         
     @property
     def state(self) -> MissileState:
-        return MissileState.BOOSTING if self.propellant.mass > 0 else MissileState.FLYING if self.coords.y > 2 else MissileState.LANDED
+        return MissileState.BOOSTING if self.propellant.mass > 0 else MissileState.FLYING if self.coords.y > 0 else MissileState.LANDED

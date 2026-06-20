@@ -21,7 +21,7 @@ class MissileFactory:
                 y=MetersPerSecond(0),
                 z=MetersPerSecond(0)
             ),
-            start_angle=Angle3D.from_degrees(0, 90)
+            start_angle=Angle3D.from_degrees(0, 45)
         )
 
     @staticmethod

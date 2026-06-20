@@ -29,17 +29,14 @@ class Reality:
 
         self._stop = False
         self._elapsed_ms: float = 0.0
-        self._initial_propellant_masses: dict[str, float] = {}
-        self._terminal_speeds: dict[str, float] = {}
 
+        self.terminal_speeds: dict[str, float] = {}
         self.moving_objects: list[MovingObject] = []
         self.explode_objects: list[MovingObject] = []
         self.boosting_phases: list[BoostingMissilePhase] = []
 
     def load_missiles_to_simulation(self, missiles: list[Missile]) -> None:
         for missile in missiles:
-            self._initial_propellant_masses[missile.name] = missile.propellant.mass
-
             if missile.propellant.type is PropellantType.NEPE:
                 phase = BoostingMissilePhase.from_nepe(missile)
             elif missile.propellant.type is PropellantType.KNSU:
@@ -52,13 +49,11 @@ class Reality:
                 raise ValueError(f"Unknown propellant type: {missile.propellant.type}")
 
             self.boosting_phases.append(phase)
-
-            # Tsiolkovsky ideal Δv estimate (v_e × ln(m₀ / m_dry)) — the terminal
-            # speed target the live tracker renders against.
-            self._terminal_speeds[missile.name] = phase.exhaust_velocity * math.log(
-                missile.mass / missile.structure.dry_mass
+            
+            self.terminal_speeds[missile.name] = phase.exhaust_velocity * math.log(
+                missile.initial_mass / missile.structure.dry_mass
             )
-
+            
             self.moving_objects.append(missile)
 
     def start(self, missiles: list[Missile]) -> None:
@@ -95,9 +90,8 @@ class Reality:
                 AirResistance().apply_drag(obj, dt)
 
             if self._event_bus and isinstance(obj, Missile):
-                initial_propellant = self._initial_propellant_masses.get(obj.name, 0.0)
-                fuel_pct = obj.propellant.mass / initial_propellant if initial_propellant > 0 else 0.0
-
+                fuel_pct = obj.propellant.mass / obj.propellant.initial_mass
+                
                 self._event_bus.publish(
                   MissileTickEvent.build(
                     obj.id,
@@ -106,7 +100,7 @@ class Reality:
                     obj.coords,
                     obj.state,
                     self._elapsed_ms,
-                    self._terminal_speeds.get(obj.name, 0.0),
+                    self.terminal_speeds.get(obj.name),
                     fuel_pct,
                   )
                 )
